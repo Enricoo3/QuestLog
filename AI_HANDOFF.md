@@ -1,647 +1,412 @@
 # AI Handoff - QuestLog
 
-Este documento existe para permitir que outro agente continue o projeto em outra maquina sem acesso ao historico da conversa original. Ele deve ser tratado como a principal fonte de contexto do produto, decisoes tomadas e estado atual da implementacao.
+Este documento e a ponte entre o Codex 2, no PC de trabalho, e o Codex 1, no PC de casa. Ele deve ser tratado como a principal fonte de contexto atual do produto, pois a conversa evoluiu bastante depois do handoff anterior.
 
-## Resumo Executivo
+## Estado Atual
 
-QuestLog e um app desktop em planejamento para ajudar o usuario a organizar jogos de campanha que esta jogando, evitando que ele esqueça, pause indefinidamente ou drope jogos iniciados. A inspiracao inicial citada pelo usuario foi "Letterboxd, mas para jogos", porem o escopo foi refinado: nao e uma rede social nem apenas um catalogo. E um app pessoal de acompanhamento visual, mais bonito e motivador que uma planilha.
+O prototipo web do QuestLog esta praticamente fechado como MVP visual/manual. O usuario disse que, neste ponto, parece pronto para virar app. Ainda assim, a migracao para app desktop so deve acontecer quando ele confirmar explicitamente.
 
-A versao atual e um prototipo web estatico em `index.html`, `styles.css` e `app.js`, usando `localStorage`. Ela foi criada rapidamente para dar uma primeira visualizacao, mas as decisoes posteriores do usuario devem guiar a continuacao. O formato final desejado e um app desktop, provavelmente com Tauri.
-
-## Intencao do Produto
-
-O problema que QuestLog resolve:
-
-- O usuario joga varios jogos de campanha.
-- Ele nao quer manter uma planilha para acompanhar o que esta jogando.
-- Ele quer visualizar status, horas e progresso de uma forma mais bonita, interativa e motivadora.
-- O app deve ajudar a nao dropar jogos iniciados.
-- O progresso deve ser baseado em horas jogadas e estimativa de tempo da historia principal.
-
-Uma boa frase de produto:
-
-> QuestLog e um app desktop para acompanhar campanhas iniciadas, visualizar progresso por horas jogadas e transformar o backlog ativo em algo mais motivador de concluir.
-
-## Decisoes Confirmadas Pelo Usuario
-
-### Nome
-
-O nome do app e **QuestLog**.
-
-### Formato
-
-O usuario quer um **app desktop**, nao um site.
-
-Direcao tecnica preferida:
-
-- Usar **Tauri** quando o projeto sair do prototipo estatico.
-- O usuario aceitou que a implementacao siga "como for melhor" tecnicamente.
-- A versao atual ainda nao usa Tauri. Ela e uma base visual/manual para iterar a experiencia antes da migracao.
-
-### Tela Inicial
-
-A tela inicial deve ser:
-
-**Status dos Jogos**
-
-Ela deve mostrar abas no topo, em ordem fixa:
-
-1. Jogando
-2. Finalizado
-3. Pausado
-4. Quero Jogar
-5. Abandonado
-
-O usuario reforcou que a primeira aba/tela deve ser essa organizacao por status. Ele prefere ver primeiro a colecao organizada, nao uma recomendacao automatica do que jogar hoje.
-
-### Abas
-
-Foi escolhido usar **abas no topo**, mostrando um status por vez.
-
-O app abre inicialmente em:
-
-- `Jogando`
-
-### Cadastro Inicial
-
-O MVP deve ser manual primeiro.
-
-Campos esperados no MVP:
-
-- Titulo
-- Plataforma
-- Status
-- Horas jogadas
-- Estimativa da historia principal em horas
-- Capa do jogo por arquivo de imagem
-- Onde parei / proximo objetivo
-- Notas
-
-### Progresso
-
-O usuario quer foco apenas na historia principal.
-
-Nao incluir no MVP:
-
-- Historia + extras
-- Complecionista
-- Tipos de estimativa selecionaveis
-
-Calculo desejado:
-
-```text
-progresso = horas_jogadas / estimativa_historia_principal
-```
-
-Exemplo:
-
-```text
-horas jogadas = 14,3h
-estimativa historia = 30h
-progresso = 47,6%
-```
-
-Na implementacao atual o progresso e arredondado para inteiro e limitado a 100%.
-
-### Tempo de Jogo
-
-O usuario enviou uma referencia visual da Steam mostrando:
-
-```text
-TEMPO DE JOGO
-14,3 horas
-```
-
-A UI atual ja tenta refletir isso nos cards: um bloco de "Tempo de jogo" com horas formatadas em `pt-BR`, por exemplo `14,3 horas`.
-
-### Capas
-
-O usuario quer que o cadastro ja permita selecionar **arquivo de imagem** para a capa.
-
-No prototipo atual:
-
-- O input `type="file"` aceita `image/*`.
-- A imagem e lida com `FileReader` e salva como Data URL dentro do `localStorage`.
-- Isso e suficiente para prototipo, mas nao ideal no app desktop final se as imagens forem grandes.
-
-Quando migrar para Tauri:
-
-- Preferir copiar a imagem para uma pasta local de dados do app ou manter apenas referencia a caminho/asset gerenciado.
-- Evitar salvar imagens grandes em SQLite/localStorage como base64 sem necessidade.
-
-## Coisas Para Automatizar Depois
-
-O usuario pediu explicitamente: comecar manual, mas anotar tudo que pode ser automatico depois.
-
-Foi criado o arquivo `AUTOMATION_BACKLOG.md` com ideias futuras. Principais automacoes:
-
-- Buscar capa automaticamente pelo nome do jogo.
-- Buscar tempo medio de historia no HowLongToBeat.
-- Buscar metadados como genero, ano, desenvolvedora e plataformas.
-- Preencher estimativa de historia automaticamente ao cadastrar.
-- Importar biblioteca da Steam.
-- Importar horas jogadas da Steam.
-- Atualizar horas jogadas automaticamente quando possivel.
-- Detectar jogos iniciados recentemente.
-- Avisar jogos sem sessao ha muitos dias.
-- Sugerir jogos perto de finalizar.
-- Marcar jogos em risco de drop.
-- Registrar historico de sessoes.
-- Criar estatisticas semanais ou mensais.
-- Exportar/importar JSON.
-- Backup automatico.
-- Migrar armazenamento para SQLite no app Tauri.
-
-Importante: essas automacoes estao fora do MVP manual.
-
-## Estado Atual Do Repositorio
-
-Workspace esperado:
-
-```text
-C:\Users\Enrico\Documents\QuestLog
-```
-
-Arquivos atuais criados/modificados:
+O projeto continua sendo um prototipo estatico com:
 
 ```text
 index.html
 styles.css
 app.js
 README.md
-AUTOMATION_BACKLOG.md
 AI_HANDOFF.md
+AUTOMATION_BACKLOG.md
+assets/
 ```
 
-Tambem podem existir:
-
-```text
-.git
-.agents
-```
-
-Observacao: durante a primeira sessao, `git`, `node` e `npm` nao estavam disponiveis no PATH global da maquina. O Codex tinha um Node empacotado em:
-
-```text
-C:\Users\Enrico\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe
-```
-
-Esse Node foi usado para validar sintaxe com:
+Ele roda localmente via servidor simples:
 
 ```powershell
-& 'C:\Users\Enrico\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe' --check app.js
+py -m http.server 5179 --bind 127.0.0.1
 ```
 
-A checagem passou.
+URL local usada no PC de trabalho:
 
-## Arquitetura Atual
+```text
+http://127.0.0.1:5179/index.html
+```
 
-Ainda e um app estatico:
+## Intencao Do Produto
 
-- `index.html`: estrutura da interface.
-- `styles.css`: visual responsivo, tema escuro, abas, cards, modal.
-- `app.js`: estado, renderizacao, persistencia local, calculo de progresso, cadastro/edicao.
-- `README.md`: resumo do produto e direcao.
-- `AUTOMATION_BACKLOG.md`: ideias futuras de automacao.
+QuestLog e um app pessoal para acompanhar jogos de campanha iniciados, pausados, finalizados, desejados ou abandonados. A dor principal do usuario e nao querer manter planilha e nao querer esquecer campanhas iniciadas.
 
-Nao ha bundler, framework, Tauri, Electron, package.json ou dependencia externa.
+A inspiracao em Letterboxd e principalmente visual/layout:
 
-## Persistencia Atual
+- colecao por capas;
+- sensacao de catalogo;
+- navegacao por prateleiras;
+- experiencia bonita e motivadora.
 
-O prototipo usa:
+Nao e rede social no MVP.
+
+Frase de produto:
+
+> QuestLog e um app desktop pessoal para acompanhar campanhas de jogos, registrar horas totais, visualizar progresso da historia e organizar o backlog ativo em uma interface premium de biblioteca.
+
+## Decisoes Confirmadas
+
+### Nome
+
+O nome e **QuestLog**.
+
+### Formato
+
+Formato final desejado: app desktop.
+
+Direcao provavel: Tauri.
+
+Importante: por enquanto continuar no site/prototipo. O usuario pediu explicitamente para nao levar ao app ate bater o martelo em uma versao.
+
+### Tela Inicial
+
+A tela inicial nao deve ser abas. Isso mudou.
+
+Agora a home e composta por prateleiras horizontais, uma abaixo da outra, estilo Letterboxd/Netflix.
+
+Ordem oficial dos status:
+
+1. Jogando
+2. Pausado
+3. Finalizado
+4. Quero Jogar
+5. Abandonado
+
+Cada status aparece como uma secao/prateleira com cards horizontais.
+
+### Header / Resumo
+
+O header atual tem:
+
+- logo QL;
+- texto QUESTLOG com QUEST em dourado e LOG em azul;
+- resumo:
+  - jogos em Jogando;
+  - jogos zerados;
+  - horas registradas;
+- botao Adicionar jogo.
+
+Foi removido:
+
+- titulo grande "Status dos Jogos";
+- indicador "perto de zerar".
+
+### Logo / Brand
+
+O usuario enviou um Brand Board e depois assets separados.
+
+Asset local atual aplicado:
+
+```text
+assets/questlog-ql-logo.png
+```
+
+Esse arquivo veio de:
+
+```text
+C:\Users\Enrico.Trajano\Downloads\IMG_2023__1_-removebg-preview.png
+```
+
+Ele foi testado e possui transparencia real:
+
+```text
+Format32bppArgb
+cantos alpha 0
+centro alpha 255
+```
+
+IMPORTANTE: se o repositorio remoto ainda nao tiver `assets/questlog-ql-logo.png`, o Codex 1 precisa commitar esse PNG ou recriar/copiar o asset localmente.
+
+### Paleta
+
+Paleta baseada no Brand Board:
+
+```css
+--bg: #06111d;
+--bg-deep: #020812;
+--surface: #0d1f33;
+--surface-strong: #132d49;
+--surface-soft: #182c43;
+--ink: #f5f7fa;
+--muted: #a9b8ca;
+--accent: #f2c14e;
+--accent-strong: #ffd978;
+--blue: #4f8ef7;
+--complete: #67d68b;
+```
+
+A identidade visual desejada e premium: navy escuro, dourado, azul e off-white.
+
+## UX Atual
+
+### Prateleiras
+
+Cada status gera uma prateleira horizontal de cards. A lista suporta:
+
+- scroll horizontal nativo;
+- arrastar com botao esquerdo do mouse para rolar para o lado;
+- clique curto no card para abrir a ficha;
+- protecao para nao abrir card acidentalmente depois de um arrasto.
+
+### Cards
+
+Card atual mostra:
+
+- capa/fallback;
+- titulo;
+- barra de progresso;
+- texto de progresso e horas restantes.
+
+Foi removida a plataforma do card para liberar espaco visual. A plataforma continua aparecendo na ficha.
+
+### Ficha Do Jogo
+
+Ao clicar no card, abre uma ficha em modal na mesma pagina.
+
+Essa ficha substituiu o antigo painel lateral fixo, que ocupava muito espaco.
+
+A ficha mostra:
+
+- capa;
+- controle de status;
+- titulo;
+- plataforma;
+- barra de progresso;
+- tempo de jogo;
+- historia estimada;
+- restante;
+- atualizado;
+- inicio;
+- finalizado;
+- notas;
+- botao Editar;
+- botao Atualizar progresso.
+
+O modal fecha por:
+
+- botao X;
+- clique fora do card/modal.
+
+### Status
+
+O status na ficha nao usa mais `select` nativo. Foi substituido por botoes estilizados:
+
+```text
+Jogando
+Pausado
+Finalizado
+Quero Jogar
+Abandonado
+```
+
+Mudar status move o card para a prateleira correta.
+
+### Datas Automaticas
+
+O usuario nao precisa preencher datas manualmente.
+
+Regras atuais:
+
+- `startedAt`: preenchido automaticamente quando o jogo entra em `Jogando` pela primeira vez.
+- `completedAt`: preenchido automaticamente quando o jogo entra em `Finalizado`.
+- se o jogo sai de `Finalizado`, `completedAt` e limpo.
+
+### Progresso
+
+O fluxo original de "Registrar sessao" foi descartado.
+
+Agora o usuario atualiza as horas totais atuais do jogo, como na Steam.
+
+Exemplo:
+
+```text
+Horas totais atuais: 14,3
+```
+
+Esse valor substitui `hoursPlayed`, nao soma uma sessao.
+
+O prompt nativo do navegador foi removido. Existe modal proprio:
+
+```text
+Atualizar progresso
+Horas totais atuais
+```
+
+### Barra De Progresso
+
+A barra evolui de cor conforme o progresso:
+
+- inicio: azul;
+- meio: azul claro/dourado;
+- perto do fim: dourado;
+- 100%: verde.
+
+Funcao atual:
 
 ```js
-localStorage
+function getProgressColor(progress) {
+  if (progress >= 100) return "#67d68b";
+  if (progress >= 70) return "#f2c14e";
+  if (progress >= 35) return "#6aa7ff";
+  return "#4f8ef7";
+}
 ```
 
-Chave atual:
+### Animacoes
 
-```js
-questlog.games.v2
+Foram adicionadas animacoes leves:
+
+- entrada do header/secoes;
+- hover dos cards;
+- zoom suave na capa;
+- transicao da barra;
+- entrada dos modais.
+
+Tambem existe respeito a:
+
+```css
+@media (prefers-reduced-motion: reduce)
 ```
 
-Chave legada migrada:
+## Campos Do Cadastro
 
-```js
-questlog.games.v1
-```
+Cadastro atual:
 
-O codigo normaliza dados antigos de `v1` para o novo formato.
+- Titulo;
+- Plataforma;
+- Status;
+- Horas jogadas;
+- Estimativa historia (h);
+- Capa do jogo;
+- Notas.
 
-Importante:
+Foi removido:
 
-- Como o app salva em `localStorage`, dados ficam presos ao navegador/origem.
-- Abrir via `file://` pode ter comportamento diferente entre navegadores.
-- Essa persistencia e apenas para prototipo.
-- No app desktop final, migrar para arquivo local ou SQLite.
+- Onde parei / proximo objetivo.
+
+O usuario decidiu que nao pretende usar esse campo.
 
 ## Modelo De Dados Atual
 
-Objeto de jogo atual:
+Objeto de jogo:
 
 ```js
 {
   id: string,
   title: string,
   platform: string,
-  status: "playing" | "completed" | "paused" | "wishlist" | "abandoned",
+  status: "playing" | "paused" | "completed" | "wishlist" | "abandoned",
   hoursPlayed: number,
   storyEstimateHours: number,
   coverDataUrl: string,
   nextStep: string,
   notes: string,
+  startedAt: number | null,
+  completedAt: number | null,
   updatedAt: number
 }
 ```
 
-Status atuais no codigo:
+Nota: `nextStep` ainda existe internamente para migrar dados antigos, mas nao aparece mais na UI e novos jogos salvam `nextStep: ""`.
+
+## Persistencia Atual
+
+Ainda usa `localStorage`.
+
+Chaves:
 
 ```js
-[
-  "playing",
-  "completed",
-  "paused",
-  "wishlist",
-  "abandoned"
-]
+const STORAGE_KEY = "questlog.games.v2";
+const LEGACY_STORAGE_KEY = "questlog.games.v1";
 ```
 
-Labels exibidos:
+Para app final, migrar para arquivo local ou SQLite.
+
+Capas atualmente sao Data URL em `localStorage`, suficiente para prototipo, mas nao ideal para app final.
+
+## Estado De Pronto
+
+O usuario disse:
+
+> bom, acho que agora ja ta 100% pra mandar pro app
+
+Interpretacao:
+
+- MVP visual/manual praticamente aprovado.
+- Proxima etapa pode ser migracao para app desktop.
+- Antes de migrar, confirmar explicitamente se ele quer partir para Tauri agora.
+
+## O Que Falta Antes De App
+
+Nada essencial de produto no MVP manual foi apontado como pendente no momento.
+
+Possiveis polimentos opcionais:
+
+- setas laterais nas prateleiras;
+- preview da capa no cadastro;
+- confirmacao visual/toast ao atualizar progresso;
+- exportar/importar JSON;
+- limpar dados de exemplo facilmente.
+
+## Automacoes Futuras
+
+Fora do MVP:
+
+- Steam puxar biblioteca;
+- Steam puxar horas jogadas automaticamente;
+- HowLongToBeat puxar estimativa da historia;
+- capas automaticas;
+- metadados automaticos;
+- historico de sessoes;
+- estatisticas semanais/mensais;
+- backup;
+- sincronizacao.
+
+Steam e possivel via API oficial, mas depende de Steam Web API Key e privacidade do perfil.
+
+HowLongToBeat e mais fragil porque nao ha API publica oficial simples; pode exigir biblioteca nao oficial/scraping/cache.
+
+## Cuidados Para O Codex 1
+
+- Nao voltar para layout de abas.
+- Nao restaurar painel lateral fixo.
+- Nao restaurar "Onde parei".
+- Nao restaurar `prompt()` nativo para progresso.
+- Nao usar select nativo para status na ficha.
+- Manter o foco em MVP manual antes de automacoes.
+- Manter a sensacao premium do Brand Board.
+- Confirmar com o usuario antes de migrar para Tauri.
+
+## Arquivos Que Devem Estar No Repo
 
 ```text
-Jogando
-Finalizado
-Pausado
-Quero Jogar
-Abandonado
+index.html
+styles.css
+app.js
+README.md
+AI_HANDOFF.md
+assets/questlog-ql-logo.png
 ```
-
-## Logica De Progresso Atual
-
-Funcao principal:
-
-```js
-function getProgress(game) {
-  if (!game.storyEstimateHours) return 0;
-  return Math.min(100, Math.round((Number(game.hoursPlayed || 0) / Number(game.storyEstimateHours)) * 100));
-}
-```
-
-Restante:
-
-```js
-function getRemainingHours(game) {
-  return Math.max(0, Number(game.storyEstimateHours || 0) - Number(game.hoursPlayed || 0));
-}
-```
-
-Formato de horas:
-
-```js
-function formatHours(value) {
-  const number = Number(value || 0);
-  return number.toLocaleString("pt-BR", {
-    minimumFractionDigits: Number.isInteger(number) ? 0 : 1,
-    maximumFractionDigits: 1,
-  });
-}
-```
-
-Essa formatacao gera exemplos como:
-
-```text
-14,3
-58,4
-75
-```
-
-Nos cards aparece como:
-
-```text
-14,3 horas
-```
-
-## UI Atual
-
-### Estrutura Geral
-
-`index.html` define:
-
-- Header principal com marca QuestLog.
-- Resumo:
-  - jogos em `Jogando`
-  - jogos quase finalizados
-  - horas registradas
-- Botao `Adicionar jogo`.
-- Abas de status no topo.
-- Toolbar com busca e ordenacao.
-- Grid de cards.
-- Painel lateral/detalhe do jogo selecionado.
-- Dialog/modal para adicionar/editar jogo.
-
-### Abas
-
-Cada aba tem:
-
-- Label
-- Contador de jogos daquele status
-
-Ao clicar:
-
-- `activeStatus` muda.
-- O grid mostra apenas jogos daquele status.
-- O primeiro jogo daquele status e selecionado automaticamente.
-
-### Cards
-
-Cada card mostra:
-
-- Capa ou fallback com iniciais.
-- Status.
-- Titulo.
-- Plataforma.
-- Bloco "Tempo de jogo".
-- Horas jogadas.
-- Barra de progresso.
-- Percentual da historia.
-- Horas restantes aproximadas quando houver estimativa.
-- Onde parei/proximo objetivo.
-
-### Detalhe Do Jogo
-
-Painel lateral mostra:
-
-- Capa.
-- Status.
-- Titulo.
-- Plataforma.
-- Barra de progresso.
-- Percentual da historia principal.
-- Tempo de jogo.
-- Historia estimada.
-- Restante.
-- Data curta de atualizacao.
-- Onde parei.
-- Notas.
-- Botao `Editar`.
-- Botao `Registrar sessao`.
-
-### Registrar Sessao
-
-Atualmente usa `prompt()`:
-
-```js
-const typedHours = prompt("Quantas horas voce jogou nesta sessao?", "1");
-```
-
-Ele aceita decimal com virgula ou ponto:
-
-```js
-Number(String(typedHours).replace(",", "."))
-```
-
-Depois soma no total de horas e atualiza `updatedAt`.
-
-Melhoria futura recomendada:
-
-- Trocar `prompt()` por um modal proprio do app.
-- Talvez incluir anotacao opcional da sessao.
-- Registrar historico de sessoes em vez de apenas somar horas.
-
-## Design Atual
-
-Estilo:
-
-- Tema escuro.
-- Inspiracao visual parcialmente em Steam/biblioteca.
-- Cards com capa grande.
-- Barra de progresso em verde/dourado.
-- Header e abas com bordas discretas.
-- Interface ainda e prototipo, mas ja tenta fugir de "planilha".
-
-Paleta atual em `styles.css`:
-
-```css
---bg: #151515;
---surface: #202020;
---surface-strong: #292929;
---surface-soft: #34302a;
---ink: #f4eee5;
---muted: #a79f96;
---line: #3c3833;
---accent: #d59c42;
---accent-strong: #f0b451;
---green: #62b182;
---danger: #d56d5f;
-```
-
-Notas:
-
-- O usuario quer uma interface interativa e visualmente interessante.
-- Nao quer algo cru/sem graca.
-- Ainda assim, o app deve continuar sendo uma ferramenta pessoal clara e organizada.
-
-## Pontos Importantes Da Conversa
-
-O usuario criticou corretamente que o primeiro agente comecou a codar rapido demais sem discutir o produto. Ao continuar, evite repetir isso.
-
-Postura recomendada:
-
-- Antes de grandes mudancas, explique brevemente o que sera alterado.
-- Se houver decisoes de produto abertas, converse primeiro.
-- Para ajustes claramente derivados das decisoes ja tomadas, pode implementar.
-- Nao transformar o app em site/landing page.
-- Nao encerrar o projeto cedo demais com "finalizado"; ainda e fase de concepcao/MVP.
-
-## Proximos Passos Recomendados
-
-### 1. Validar A UI Atual Com O Usuario
-
-Pedir feedback sobre:
-
-- Abas no topo.
-- Visual escuro estilo biblioteca.
-- Card com capa grande.
-- Painel lateral.
-- Campos do cadastro.
-- Uso de "Onde parei / proximo objetivo".
-
-### 2. Melhorar UX Do MVP Estatico
-
-Possiveis melhorias imediatas sem Tauri:
-
-- Substituir `prompt()` de registrar sessao por modal proprio.
-- Adicionar preview da capa no modal.
-- Permitir remover capa.
-- Ajustar responsividade se necessario.
-- Adicionar estado vazio mais bonito por aba.
-- Adicionar filtro de busca mais integrado ao visual.
-- Melhorar ordenacao:
-  - atualizados recentemente
-  - mais perto de zerar
-  - mais horas jogadas
-  - titulo
-- Considerar campo "data de inicio" e "data finalizado".
-
-### 3. Decidir Quando Migrar Para Tauri
-
-Quando a UI e modelo estiverem suficientemente aprovados:
-
-- Criar projeto Tauri.
-- Escolher stack frontend:
-  - HTML/CSS/JS simples inicialmente, ou
-  - React/Vite se o app crescer.
-- Persistencia:
-  - SQLite via plugin ou sidecar, ou
-  - arquivo JSON local em app data.
-
-Recomendacao:
-
-- Para MVP desktop simples, Tauri + frontend Vite/React pode ser bom se houver muitos componentes.
-- Se o objetivo for manter leve e direto, Tauri com HTML/CSS/JS tambem funciona, mas pode ficar trabalhoso conforme telas/modal/historico crescem.
-
-### 4. Modelagem Para Desktop
-
-Possivel modelo futuro:
-
-```text
-Game
-- id
-- title
-- platform
-- status
-- hours_played
-- story_estimate_hours
-- cover_path
-- next_step
-- notes
-- started_at
-- completed_at
-- created_at
-- updated_at
-```
-
-Se adicionar historico:
-
-```text
-Session
-- id
-- game_id
-- played_at
-- hours_added
-- note
-```
-
-Se integrar fontes externas:
-
-```text
-ExternalGameMetadata
-- game_id
-- source
-- source_id
-- cover_url
-- story_estimate_hours
-- fetched_at
-```
-
-### 5. Automatizacoes Futuras
-
-Antes de implementar integracoes:
-
-- Confirmar viabilidade de HowLongToBeat. Pode envolver ausencia de API oficial e necessidade de scraping/biblioteca nao oficial.
-- Confirmar como lidar com Steam:
-  - API oficial exige Steam Web API key para certos endpoints.
-  - Horas jogadas podem depender de perfil publico.
-  - Pode haver privacidade/limites.
-
-Por enquanto, nao implementar essas integracoes sem conversar com o usuario.
-
-## Cuidados Tecnicos
-
-### Imagens Em LocalStorage
-
-A implementacao atual salva capas como Data URL. Isso pode estourar tamanho de `localStorage` se muitas imagens grandes forem usadas.
-
-No prototipo tudo bem, mas se o usuario comecar a usar seriamente:
-
-- Redimensionar/comprimir imagem antes de salvar, ou
-- Migrar para Tauri e armazenar imagens no disco.
-
-### Acentos
-
-Os arquivos foram mantidos majoritariamente em ASCII por preferencia de edicao. Textos visiveis estao sem acento em varios pontos:
-
-```text
-Concluido
-proximo
-sessao
-historia
-```
-
-Isso nao foi uma decisao de produto, apenas uma escolha tecnica inicial. O usuario fala portugues; no futuro vale considerar acentuar a UI corretamente quando o pipeline estiver estavel.
-
-### Browser Interno
-
-Durante a sessao original, houve tentativa de validar visualmente pelo navegador interno do Codex. Falhou com erro de sandbox:
-
-```text
-windows sandbox failed: runner error: CreateProcessAsUserW failed: 5
-```
-
-Portanto, a validacao visual ainda nao foi feita pelo agente. Apenas `node --check app.js` passou.
 
 ## Comandos Uteis
 
-Se Node global nao estiver no PATH, usar o Node empacotado do Codex:
+Validar JS:
 
 ```powershell
-& 'C:\Users\Enrico\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe' --check app.js
+node --check app.js
 ```
 
-Listar arquivos:
+Servir prototipo:
 
 ```powershell
-Get-ChildItem -Force
+py -m http.server 5179 --bind 127.0.0.1
 ```
 
-Buscar referencias:
+Abrir:
 
-```powershell
-Select-String -Path index.html,styles.css,app.js -Pattern "status-tab|story-estimate|cover"
+```text
+http://127.0.0.1:5179/index.html
 ```
-
-## Definicao De Pronto Do MVP Manual
-
-Um MVP inicial adequado deve permitir:
-
-- Adicionar jogo manualmente.
-- Escolher status.
-- Ver jogos em abas por status.
-- Escolher capa por arquivo.
-- Registrar horas jogadas.
-- Informar estimativa da historia principal.
-- Ver progresso calculado automaticamente.
-- Registrar onde parou/proximo objetivo.
-- Editar e excluir jogos.
-- Ter persistencia local confiavel.
-- Ter visual de app/biblioteca, nao de planilha.
-
-O prototipo atual cobre a maior parte disso, exceto persistencia robusta desktop e UX refinada de registrar sessao.
-
-## Mensagem Ao Proximo Agente
-
-Nao assuma que o projeto ja esta "pronto". O usuario esta em fase de definir produto e experiencia. A implementacao atual e util como base, mas deve continuar sendo moldada com feedback.
-
-Priorize:
-
-1. Respeitar as decisoes confirmadas.
-2. Manter foco em app desktop/Tauri.
-3. Evitar transformar em landing page ou site.
-4. Manter o MVP manual antes de automacoes.
-5. Construir uma interface visual, interativa e motivadora.
-6. Conversar antes de mudancas grandes de produto.
-
-Se for continuar codando imediatamente, a melhor proxima tarefa provavelmente e:
-
-> Substituir o prompt de "Registrar sessao" por um modal proprio com campo de horas e anotacao opcional, preparando caminho para historico de sessoes.
-

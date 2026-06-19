@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QuestLog</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="hero">
+        <div class="brand">
+          <span class="brand-mark">QL</span>
+          <div>
+            <p class="eyebrow">QuestLog</p>
+            <h1>Status dos Jogos</h1>
+          </div>
+        </div>
+
+        <section class="summary-strip" aria-label="Resumo da biblioteca">
+          <div>
+            <strong id="stat-playing">0</strong>
+            <span>jogando</span>
+          </div>
+          <div>
+            <strong id="stat-near-finish">0</strong>
+            <span>quase la</span>
+          </div>
+          <div>
+            <strong id="stat-hours">0h</strong>
+            <span>registradas</span>
+          </div>
+        </section>
+
+        <button class="primary-action" id="new-game-button" type="button">Adicionar jogo</button>
+      </header>
+
+      <nav class="status-tabs" aria-label="Status dos jogos">
+        <button class="status-tab active" data-status="playing" type="button">
+          <span>Jogando</span>
+          <strong>0</strong>
+        </button>
+        <button class="status-tab" data-status="completed" type="button">
+          <span>Finalizado</span>
+          <strong>0</strong>
+        </button>
+        <button class="status-tab" data-status="paused" type="button">
+          <span>Pausado</span>
+          <strong>0</strong>
+        </button>
+        <button class="status-tab" data-status="wishlist" type="button">
+          <span>Quero Jogar</span>
+          <strong>0</strong>
+        </button>
+        <button class="status-tab" data-status="abandoned" type="button">
+          <span>Abandonado</span>
+          <strong>0</strong>
+        </button>
+      </nav>
+
+      <section class="toolbar" aria-label="Busca e ordenacao">
+        <label class="search-box">
+          <span>Buscar</span>
+          <input id="search-input" type="search" placeholder="Nome, plataforma, onde parei..." />
+        </label>
+        <label>
+          <span>Ordenar</span>
+          <select id="sort-select">
+            <option value="updated">Atualizados recentemente</option>
+            <option value="progress">Mais perto de zerar</option>
+            <option value="hours">Mais horas jogadas</option>
+            <option value="title">Titulo</option>
+          </select>
+        </label>
+      </section>
+
+      <section class="content-grid">
+        <section class="library-panel" aria-label="Jogos do status selecionado">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow" id="active-status-label">Jogando</p>
+              <h2 id="section-title">Campanhas em andamento</h2>
+            </div>
+            <span id="result-count">0 encontrados</span>
+          </div>
+          <div class="game-grid" id="game-grid" aria-live="polite"></div>
+        </section>
+
+        <aside class="detail-panel" id="detail-panel" aria-label="Detalhes do jogo"></aside>
+      </section>
+    </main>
+
+    <dialog id="game-dialog">
+      <form id="game-form" method="dialog">
+        <div class="modal-header">
+          <div>
+            <p class="eyebrow">Registro manual</p>
+            <h3 id="dialog-title">Adicionar jogo</h3>
+          </div>
+          <button class="icon-button" value="cancel" type="button" id="close-dialog-button" aria-label="Fechar">x</button>
+        </div>
+
+        <input type="hidden" id="game-id" />
+        <input type="hidden" id="cover-data-input" />
+
+        <div class="form-grid">
+          <label>
+            <span>Titulo</span>
+            <input id="title-input" required maxlength="90" />
+          </label>
+          <label>
+            <span>Plataforma</span>
+            <input id="platform-input" maxlength="50" placeholder="Steam, PS5, Switch..." />
+          </label>
+          <label>
+            <span>Status</span>
+            <select id="status-input">
+              <option value="playing">Jogando</option>
+              <option value="completed">Finalizado</option>
+              <option value="paused">Pausado</option>
+              <option value="wishlist">Quero Jogar</option>
+              <option value="abandoned">Abandonado</option>
+            </select>
+          </label>
+          <label>
+            <span>Horas jogadas</span>
+            <input id="hours-input" type="number" min="0" step="0.1" value="0" />
+          </label>
+          <label>
+            <span>Estimativa historia (h)</span>
+            <input id="story-estimate-input" type="number" min="0" step="0.5" value="0" />
+          </label>
+          <label>
+            <span>Capa do jogo</span>
+            <input id="cover-input" type="file" accept="image/*" />
+          </label>
+          <label class="wide">
+            <span>Onde parei / proximo objetivo</span>
+            <input id="next-step-input" maxlength="160" placeholder="Ex: Voltar no Ato 2 e terminar a quest da torre" />
+          </label>
+          <label class="wide">
+            <span>Notas</span>
+            <textarea id="notes-input" rows="4" placeholder="Build, escolhas, motivo da pausa, ideias para a proxima sessao..."></textarea>
+          </label>
+        </div>
+
+        <div class="modal-actions">
+          <button class="secondary-action" type="button" id="delete-game-button">Excluir</button>
+          <button class="primary-action" type="submit">Salvar</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script src="app.js"></script>
+  </body>
+</html>
